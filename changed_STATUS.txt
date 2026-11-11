@@ -1,0 +1,24 @@
+APPLICATION DATA AND REPORT STORAGE PILOT
+
+The options assessment covers application data, report provenance, snapshots and
+generated files. The storage decision and synthetic proof are pending.
+
+Inputs to the decision
+
+1. One reporting use, including the input owner, record meaning, format, update
+   and correction rules, and permitted access and retention.
+2. The storage services and clients supported by the platform, including durable
+   mounts, service identities and backup and restore support.
+3. The apps and jobs that write, including how often they write, expected overlap,
+   retry and conflict rules, and who owns recovery.
+
+Acceptance
+
+The first synthetic proof should save and reopen the intended input version,
+link one generated file to a completed analytical run and exercise validation,
+retries or edit conflicts, restart and isolated restore. Use the results to
+decide whether the proposed storage fits the workload and operating requirements.
+
+The companion storage options note describes the approach and links to the
+SQLite and Domino documentation. Platform capabilities and runtime behavior
+remain to be verified in the target environment.

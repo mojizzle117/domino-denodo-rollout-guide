@@ -1,0 +1,91 @@
+APPLICATION DATA AND REPORT STORAGE FOR A HOSTED DASHBOARD
+
+Start with one reporting use, the storage services supported in the environment,
+and the processes that need to write. A small manual entry or an approved file
+import is enough for a first pilot. Establish the source format, correction rules
+and use and retention rights before designing the import.
+
+What to store
+
+- Business inputs need validated records, an owner, effective dates, source
+  provenance and attributable versions. Retain versions used by prior reports.
+- Report definitions and run metadata identify the exact inputs, analytical run,
+  report definition, software revision, reporting scope and output. These small
+  records may share a relational database with the business inputs.
+- Large extracts and prepared snapshots belong in durable file or object storage.
+  Use a stable location, a version and a content hash to identify each artifact.
+- Store generated reports in an approved output location. Link each file and its
+  content hash to its report version. Preserve an issued file when its exact
+  appearance matters.
+
+Storage options
+
+SQLite can support a pilot where one app owns writes and several people use it
+through the browser. SQLite allows one writer at a time. Keep transactions short
+and handle contention explicitly. Verify storage durability and filesystem
+locking. Write-ahead logging requires processes on the same host and does not
+work over network filesystems. A job can hand a staged input file to the app's
+importer if the platform supports that handoff. [1, 2]
+
+A supported managed relational database is a candidate when independent apps or
+jobs need a common transaction endpoint. Confirm the available client, isolation,
+permissions, backup and support arrangements. Evaluate expected write frequency,
+contention, growth and recovery requirements before selecting a service.
+
+File or object storage can complement either database for snapshots and report
+files. Verify version retention, publication behavior and access for each app
+and job. Use a database transaction to record changes to editable records and
+to enforce uniqueness and version checks.
+
+Domino Apps need explicit persistence for application state. Domino's documented
+options include mounted Datasets and external storage. Verify the installed
+platform's storage semantics and the identities used by each App and Job. Check
+what survives a restart or replacement and who owns shared writes. [4]
+
+Writes, versions and access
+
+Validate staged imports against the agreed row meaning, required fields and types,
+units, dates and revision rules. Stop publication if validation fails. Store an
+import identifier, checksum and outcome. A retry with the same identifier and
+content should return the original outcome. Reject a reused identifier with
+different content. Agree separately how to identify duplicate business records.
+
+For manual changes, check the current version when saving. A stale edit should
+return a conflict for review. Record the actor, time and reason for the change.
+Give viewers, editors, importers and reviewers the access each role needs. Confirm
+how the app obtains the user identity alongside its service identity.
+
+Report provenance and recovery
+
+Before generating a report, pin the exact completed analytical run and its
+integrity metadata, the additional input versions, definition and software
+revision, filters and cutoff. Link the resulting file, generation time and
+review status to that record. A new preparation should leave the earlier run
+available. Reopening the selected run loads the saved snapshot and can rebuild
+temporary indexes. Verify any input locations and software versions that the
+reopen checks require.
+
+Publish references only after the linked files are complete and verified. An
+interruption before publication should leave the previous report available and
+allow a safe retry. Agree how much data loss and downtime are acceptable and who
+owns recovery. Use a consistent backup method for SQLite or the supported backup
+procedure for a managed service. Restore the database and the matching input,
+snapshot and output versions as a set. Check their integrity in an isolated
+environment and verify that the selected report opens. [3]
+
+A small synthetic proof
+
+Confirm one use example, supported storage and the app or job that owns writes.
+Choose one invented import or manual correction and link a small generated file
+to a synthetic completed run. Exercise valid and invalid input, import retry or
+stale edit, denied write access, interruption before publication, restart and an
+isolated restore. Include competing writes if the intended topology requires
+independent writers. Record the results and measure write waiting, report
+generation and read latency separately.
+
+References
+
+1. SQLite use cases. https://sqlite.org/whentouse.html
+2. SQLite write-ahead logging. https://sqlite.org/wal.html
+3. SQLite backup. https://sqlite.org/backup.html
+4. Domino App persistence. https://docs.dominodatalab.com/en/6.2/user_guide/b99d5d/persist-data-from-apps/
